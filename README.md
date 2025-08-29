@@ -11,4 +11,7 @@ docker run --name pgshard2 -e POSTGRES_PASSWORD=postgres -d -p 5435:5435 pgshard
 docker run --name pgshard3 -e POSTGRES_PASSWORD=postgres -d -p 5436:5436 pgshard
 ```
 
-
+# Install dependencies
+```bash
+npm install express pg consistent-hash crypto
+```
