@@ -2,8 +2,9 @@ const express = require('express');
 const app = express();
 const {Client} = require('pg');
 const crypto = require('crypto');
-const ConsistentHash = require('consistent-hash');
-const hr = new ConsistentHash();
+// const ConsistentHash = require('consistent-hash');
+const HashRing = require('hashring');
+const hr = new HashRing();
 hr.add('5434');
 hr.add('5435');
 hr.add('5436');
@@ -40,6 +41,23 @@ async function connect() {
     await clients['5435'].connect();
     await clients['5436'].connect();
 }
+
+app.get('/:urlId', async (req, res) => {
+    //https://localhost:8081/abcd1
+    const urlId = req.params.urlId; //abcd1
+    const server = hr.get(urlId);
+    const result = await clients[server].query(`SELECT * FROM URL_TABLE WHERE URL_ID = $1`, [urlId]);
+    if (result.rowCount > 0) {
+        res.send({
+            "urlId": urlId,
+            "url": result.rows[0],
+            "server": server
+        })
+    }
+    else {
+        res.sendStatus(404);
+    }
+})
 
 app.post('/', async (req, res) => {
     const url = req.query.url;
